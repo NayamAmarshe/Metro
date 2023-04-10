@@ -5,6 +5,7 @@ on:
     branches: [ dev ]
   pull_request:
     branches: [ dev ]
+  workflow_dispatch:
 
 jobs:
   check:
@@ -32,3 +33,22 @@ jobs:
       - uses: gradle/gradle-build-action@v2
       - name: Build
         run: ./gradlew app:assemble
+        
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v3
+    - name: setup jdk
+      uses: actions/setup-java@v1
+      with:
+        java-version: 17
+    - name: Make Gradle executable
+      run: chmod +x ./gradlew
+    - name: Build Release APK
+      run: ./gradlew assembleRelease
+    - name: Releasing using Hub
+      uses: kyze8439690/action-release-releaseapk@master
+      env:
+       GITHUB_TOKEN: ${{ secrets.TOKEN }}
+       APP_FOLDER: app
